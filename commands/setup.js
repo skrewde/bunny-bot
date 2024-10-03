@@ -1,19 +1,21 @@
-const { EmbedBuilder } = require('discord.js'); // Import EmbedBuilder
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-    data: {
-        name: 'setup', // Name of the command
-    },
-    description: 'Sets up reaction roles', // Optional command description
+    data: new SlashCommandBuilder()
+        .setName('setup')
+        .setDescription('Sets up reaction roles'),
 
-    async execute(message, client) {
+    async execute(interaction) {
+        // Acknowledge the interaction with a deferred response
+        await interaction.deferReply({ ephemeral: true });
+
         const roleEmbedMapping = [
             {
-                title: " ",
+                title: "Color Roles",
                 description: "React to get your color role!",
-                color: "#0000FF", // Change to hex code for blue
+                color: 0x0000FF, // Use hexadecimal color codes
                 roles: {
-                    '🔴': 'ROLE_ID_FOR_RED',   // Replace with actual role IDs
+                    '🔴': 'ROLE_ID_FOR_RED', // Replace with actual role IDs
                     '🟢': 'ROLE_ID_FOR_GREEN',
                     '🔵': 'ROLE_ID_FOR_BLUE'
                 }
@@ -21,7 +23,7 @@ module.exports = {
             {
                 title: "Game Roles",
                 description: "React to get your game role!",
-                color: "#008000", // Change to hex code for green
+                color: 0x00FF00, // Use hexadecimal color codes
                 roles: {
                     '🎮': 'ROLE_ID_FOR_GAMER',
                     '⚔️': 'ROLE_ID_FOR_WARRIOR',
@@ -30,28 +32,34 @@ module.exports = {
             }
         ];
 
-        // Loop through each embed data to create the messages
-        for (const embedData of roleEmbedMapping) {
-            const embed = new EmbedBuilder()
-                .setTitle(embedData.title)
-                .setDescription(embedData.description)
-                .setColor(embedData.color); // Set the color as a hex code
+        // Send an initial response to inform the user
+        await interaction.editReply({ content: 'Setting up your roles...', ephemeral: true });
 
-            // Add each role to the embed as a field
+        // Loop through each embed data
+        for (const embedData of roleEmbedMapping) {
+            const embed = {
+                title: embedData.title,
+                description: embedData.description,
+                color: embedData.color,
+                fields: [], // Initialize fields array for embeds
+            };
+
+            // Loop through the roles and add fields
             for (const [emoji, roleId] of Object.entries(embedData.roles)) {
-                const role = message.guild.roles.cache.get(roleId);
+                const role = interaction.guild.roles.cache.get(roleId);
                 if (role) {
-                    embed.addFields({ name: emoji, value: role.name, inline: true });
+                    embed.fields.push({ name: emoji, value: role.name, inline: true });
                 }
             }
 
-            // Send the embed message
-            const embedMessage = await message.channel.send({ embeds: [embed] });
-
-            // React to the message with each emoji
+            // Send the embed message and add reactions
+            const embedMessage = await interaction.channel.send({ embeds: [embed] });
             for (const emoji of Object.keys(embedData.roles)) {
                 await embedMessage.react(emoji);
             }
         }
+
+        // Edit the initial response to indicate completion
+        await interaction.editReply({ content: 'Your roles have been set up!', ephemeral: true });
     }
 };
