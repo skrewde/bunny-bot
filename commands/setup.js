@@ -21,11 +21,11 @@ module.exports = {
                 }
             },
             {
-                title: "Game Roles",
-                description: "React to get your game role!",
+                title: " 「 ✦ pronouns ✦ 」 ",
+                description: "react to get your role!",
                 color: 0x00FF00, // Use hexadecimal color codes
                 roles: {
-                    '🎮': 'ROLE_ID_FOR_GAMER',
+                    '🎮': '1291264164907454485',
                     '⚔️': 'ROLE_ID_FOR_WARRIOR',
                     '🏹': 'ROLE_ID_FOR_ARCHER'
                 }
